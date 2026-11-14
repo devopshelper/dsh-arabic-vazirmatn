@@ -1,6 +1,6 @@
 # dsh-arabic + Vazirmatn for DeepSeek Harness (Windows)
 
-One script that gives a Windows DeepSeek Harness install:
+One script that gives every Windows DeepSeek Harness profile (desktop, web, headless, anything else you added):
 
 - **dsh-arabic** ([npm](https://www.npmjs.com/package/dsh-arabic)): bidi-safe RTL rendering for mixed Arabic/English text plus a full Arabic UI language pack.
 - **Vazirmatn**: the interface font, replacing the thmanyah cuts dsh-arabic ships with (400/500/700, Latin and Arabic).
@@ -23,7 +23,7 @@ irm https://raw.githubusercontent.com/devopshelper/dsh-arabic-vazirmatn/main/ins
 powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/devopshelper/dsh-arabic-vazirmatn/main/install.ps1 | iex"
 ```
 
-Options work with the bat too: `install.bat -Profile web`, `install.bat -NoFonts`, `install.bat -Restore`.
+Options work with the bat too: `install.bat -Profile web`, `install.bat -NoFonts`, `install.bat -Restore`. With no arguments it covers every profile.
 
 Then **quit DeepSeek Harness completely** (tray icon included, not just the window) and start it again. Plugins and injection rows are loaded at host startup, so a page refresh is not enough.
 
@@ -31,10 +31,10 @@ Arabic UI afterwards: **Settings > General > Language > Arabic**. The RTL layer 
 
 ## What the script does
 
-1. Picks the profile: `desktop` if it exists, otherwise `web` (the one the desktop app and `dsh web` actually boot).
-2. Runs `dsh plugin --profile <profile> add dsh-arabic`, which installs the package and registers it in the profile's bundle list.
-3. Downloads the pinned Vazirmatn release, verifies its SHA-256, and replaces the plugin's three font folders with Vazirmatn Regular/Medium/Bold.
-4. Backs the original thmanyah files up to `%USERPROFILE%\.dsh\backups\dsh-arabic-fonts-<timestamp>` first.
+1. Walks every profile under `%USERPROFILE%\.dsh\profiles` (desktop, web, headless, any profile you made). `-Profile` limits the run to one or several.
+2. Runs `dsh plugin --profile <profile> add dsh-arabic` for each, which installs the package and registers it in that profile's bundle list.
+3. Downloads the pinned Vazirmatn release once, verifies its SHA-256, and replaces the plugin's three font folders in each profile with Vazirmatn Regular/Medium/Bold.
+4. Backs the original thmanyah files up to `%USERPROFILE%\.dsh\backups\dsh-arabic-fonts-<profile>-<timestamp>` first.
 
 The family names in the injected CSS stay as dsh-arabic authored them; only the glyphs change, so interface text, paragraphs and headings all render in Vazirmatn. Code stays monospace.
 
@@ -43,13 +43,14 @@ The family names in the injected CSS stay as dsh-arabic authored them; only the 
 ```powershell
 $u = 'https://raw.githubusercontent.com/devopshelper/dsh-arabic-vazirmatn/main/install.ps1'
 
-& ([scriptblock]::Create((irm $u))) -Profile web   # a specific profile
-& ([scriptblock]::Create((irm $u))) -NoFonts       # plugin only, keep the fonts
-& ([scriptblock]::Create((irm $u))) -Restore       # put the original fonts back
-& ([scriptblock]::Create((irm $u))) -Restart       # quit and relaunch the desktop app
+& ([scriptblock]::Create((irm $u))) -Profile web          # one profile
+& ([scriptblock]::Create((irm $u))) -Profile desktop,web  # only these two
+& ([scriptblock]::Create((irm $u))) -NoFonts              # plugin only, keep the fonts
+& ([scriptblock]::Create((irm $u))) -Restore              # put the original fonts back
+& ([scriptblock]::Create((irm $u))) -Restart              # quit and relaunch the desktop app
 ```
 
-Environment variables `DSH_HOME` and `DSH_PROFILE` are honoured when the parameters are omitted.
+The `DSH_HOME` environment variable is honoured when `-DshHome` is omitted.
 
 > Do not use `-Restart` when the script runs inside a DSH terminal: it quits the app that hosts that terminal.
 
@@ -67,10 +68,11 @@ irm https://raw.githubusercontent.com/devopshelper/dsh-arabic-vazirmatn/main/ins
 .\install.ps1 -Restore
 ```
 
-This copies the newest backup over the plugin's fonts and removes the override note. Then restart DSH. To remove the plugin itself as well:
+This copies each profile's newest backup over its fonts and removes the override note. Then restart DSH. To remove the plugin itself as well, run it once per profile:
 
 ```powershell
 dsh plugin --profile desktop remove dsh-arabic
+dsh plugin --profile web remove dsh-arabic
 ```
 
 ## Notes
