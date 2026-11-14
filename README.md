@@ -9,19 +9,21 @@ No admin rights, no patched app files. The original fonts are backed up and can 
 
 ## Install
 
-Open **PowerShell** and run:
+**The easy way:** right-click [install.bat](https://github.com/devopshelper/dsh-arabic-vazirmatn/raw/main/install.bat), choose **Save link as**, then double-click the file. It downloads the PowerShell installer and runs it with a per-process ExecutionPolicy bypass, so no Windows setting has to change and no `.ps1` association is touched.
+
+Windows may warn that the file came from the internet: click **More info > Run anyway**.
+
+**From a terminal**, either of these is equivalent:
 
 ```powershell
 irm https://raw.githubusercontent.com/devopshelper/dsh-arabic-vazirmatn/main/install.ps1 | iex
 ```
 
-The same line works from **cmd.exe**:
-
 ```bat
 powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/devopshelper/dsh-arabic-vazirmatn/main/install.ps1 | iex"
 ```
 
-Or download the repo and double-click `install.cmd`.
+Options work with the bat too: `install.bat -Profile web`, `install.bat -NoFonts`, `install.bat -Restore`.
 
 Then **quit DeepSeek Harness completely** (tray icon included, not just the window) and start it again. Plugins and injection rows are loaded at host startup, so a page refresh is not enough.
 
